@@ -12,6 +12,7 @@ import json
 import string
 from argparse import ArgumentParser
 import pickle
+import matplotlib.pyplot as plt
 
 unk = '<UNK>'
 
@@ -32,17 +33,13 @@ class RNN(nn.Module):
         return self.loss(predicted_vector, gold_label)
 
     def forward(self, inputs):
-        hidden, _ = self.rnn(inputs)
-
+        output, hidden = self.rnn(inputs)
         # [to fill] obtain output layer representations
-        output = self.W(hidden)
-
+        output = self.W(output)
         # [to fill] sum over output
         output_sum = torch.sum(output, dim=0)
-
         # [to fill] obtain probability dist.
         predicted_vector = self.softmax(output_sum)
-
         return predicted_vector
 
 
@@ -97,7 +94,7 @@ if __name__ == "__main__":
 
     stopping_condition = False
     epoch = 0
-
+    train_list, valid_list, tst_list = [], [], []
     last_train_accuracy = 0
     last_validation_accuracy = 0
     last_test_accuracy = 0
@@ -154,38 +151,8 @@ if __name__ == "__main__":
         print(loss_total / loss_count)
         print("Training completed for epoch {}".format(epoch + 1))
         print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
+        train_list.append(correct/total)
         trainning_accuracy = correct / total
-
-        model.eval()
-        correct = 0
-        total = 0
-        random.shuffle(test_data)
-        print("Validation started for epoch {}".format(epoch + 1))
-        valid_data = valid_data
-
-        for input_words, gold_label in tqdm(valid_data):
-            input_words = " ".join(input_words)
-            input_words = input_words.translate(input_words.maketrans("", "", string.punctuation)).split()
-            vectors = [word_embedding[i.lower()] if i.lower() in word_embedding.keys() else word_embedding['unk'] for i
-                       in input_words]
-
-            vectors = torch.tensor(vectors).view(len(vectors), 1, -1)
-            output = model(vectors)
-            predicted_label = torch.argmax(output)
-            correct += int(predicted_label == gold_label)
-            total += 1
-            # print(predicted_label, gold_label)
-        print("Validation completed for epoch {}".format(epoch + 1))
-        print("Validation accuracy for epoch {}: {}".format(epoch + 1, correct / total))
-        validation_accuracy = correct / total
-
-        if validation_accuracy < last_validation_accuracy and trainning_accuracy > last_train_accuracy:
-            stopping_condition = True
-            print("Training done to avoid overfitting!")
-            print("Best validation accuracy is:", last_validation_accuracy)
-        else:
-            last_validation_accuracy = validation_accuracy
-            last_train_accuracy = trainning_accuracy
 
         model.eval()
         correct = 0
@@ -208,7 +175,9 @@ if __name__ == "__main__":
             # print(predicted_label, gold_label)
         print("Validation completed for epoch {}".format(epoch + 1))
         print("Validation accuracy for epoch {}: {}".format(epoch + 1, correct / total))
+        valid_list.append(correct/total)
         validation_accuracy = correct / total
+
 
         model.eval()
         correct = 0
@@ -232,17 +201,21 @@ if __name__ == "__main__":
         print("Test completed for epoch {}".format(epoch + 1))
         print("Test accuracy for epoch {}: {}".format(epoch + 1, correct / total))
         test_accuracy = correct / total
-
-
-        if validation_accuracy < last_validation_accuracy and trainning_accuracy > last_train_accuracy:
-            stopping_condition=True
-            print("Training done to avoid overfitting!")
-            print("Best validation accuracy is:", last_validation_accuracy)
-        else:
-            last_validation_accuracy = validation_accuracy
-            last_train_accuracy = trainning_accuracy
+        tst_list.append(correct/total)
 
         epoch += 1
+        #stopping after 10 epochs
+        if epoch > 9:
+            stopping_condition = True
+
+    ''' x = list(np.arange(args.epochs))
+     plt.plot(x, train_list, label="Train Accuracy")
+     plt.plot(x, valid_list, label="Validation Accuracy")
+     plt.plot(x, tst_list, label="Test Accuracy")
+     plt.title("Accuracy Plot")
+     plt.xlabel("epochs")
+     plt.ylabel("accuracy")
+     plt.legend() '''
 
 
 
@@ -251,3 +224,5 @@ if __name__ == "__main__":
     # You may find it beneficial to keep track of training accuracy or training loss;
 
     # Think about how to update the model and what this entails. Consider ffnn.py and the PyTorch documentation for guidance
+
+    #
