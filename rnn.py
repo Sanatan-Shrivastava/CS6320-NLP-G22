@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 
 unk = '<UNK>'
 
-
 # Consult the PyTorch documentation for information on the functions used below:
 # https://pytorch.org/docs/stable/torch.html
 class RNN(nn.Module):
