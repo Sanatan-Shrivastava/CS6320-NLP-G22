@@ -35,10 +35,13 @@ class RNN(nn.Module):
         output, hidden = self.rnn(inputs)
         # [to fill] obtain output layer representations
         output = self.W(output)
+        
         # [to fill] sum over output
         output_sum = torch.sum(output, dim=0)
+        
         # [to fill] obtain probability dist.
         predicted_vector = self.softmax(output_sum)
+        
         return predicted_vector
 
 
@@ -97,6 +100,8 @@ if __name__ == "__main__":
     last_train_accuracy = 0
     last_validation_accuracy = 0
     last_test_accuracy = 0
+    
+    train_losses = []
     while not stopping_condition:
         random.shuffle(train_data)
         model.train()
@@ -110,6 +115,7 @@ if __name__ == "__main__":
 
         loss_total = 0
         loss_count = 0
+        curr_loss = []
         for minibatch_index in tqdm(range(N // minibatch_size)):
             optimizer.zero_grad()
             loss = None
@@ -143,11 +149,14 @@ if __name__ == "__main__":
                     loss += example_loss
 
             loss = loss / minibatch_size
+            curr_loss.append(loss)
             loss_total += loss.data
             loss_count += 1
             loss.backward()
             optimizer.step()
         print(loss_total / loss_count)
+        train_losses.append(sum(curr_loss))
+        print("training loss for this epoch {}".format(epoch + 1, train_losses))
         print("Training completed for epoch {}".format(epoch + 1))
         print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
         train_list.append(correct/total)
@@ -217,7 +226,15 @@ if __name__ == "__main__":
      plt.legend() '''
 
 
-
+    x = list(range(epoch))
+    plt.figure(figsize=(12, 5))
+    # Plot Training Loss
+    plt.subplot(1, 2, 2)
+    plt.plot(x, train_losses, label="Training Loss")
+    plt.title("Loss Plot")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
 
 
     # You may find it beneficial to keep track of training accuracy or training loss;

@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 unk = '<UNK>'
 
+
 # Consult the PyTorch documentation for information on the functions used below:
 # https://pytorch.org/docs/stable/torch.html
 class RNN(nn.Module):
@@ -23,7 +24,8 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.h = h
         self.numOfLayer = 1
-        self.rnn = nn.RNN(input_dim, h, self.numOfLayer, nonlinearity='tanh')
+        # adding the ReLU function and dropout as modification
+        self.rnn = nn.RNN(input_dim, h, self.numOfLayer, nonlinearity='relu', dropout = 0.2)
         self.W = nn.Linear(h, 5)
         self.softmax = nn.LogSoftmax(dim=1)
         self.loss = nn.NLLLoss()
@@ -32,9 +34,9 @@ class RNN(nn.Module):
         return self.loss(predicted_vector, gold_label)
 
     def forward(self, inputs):
-        output, hidden = self.rnn(inputs)
+        hidden, _ = self.rnn(inputs)
         # [to fill] obtain output layer representations
-        output = self.W(output)
+        output = self.W(hidden)
         # [to fill] sum over output
         output_sum = torch.sum(output, dim=0)
         # [to fill] obtain probability dist.
@@ -97,8 +99,6 @@ if __name__ == "__main__":
     last_train_accuracy = 0
     last_validation_accuracy = 0
     last_test_accuracy = 0
-    
-    train_losses = []
     while not stopping_condition:
         random.shuffle(train_data)
         model.train()
@@ -112,7 +112,6 @@ if __name__ == "__main__":
 
         loss_total = 0
         loss_count = 0
-        curr_loss = []
         for minibatch_index in tqdm(range(N // minibatch_size)):
             optimizer.zero_grad()
             loss = None
@@ -146,14 +145,11 @@ if __name__ == "__main__":
                     loss += example_loss
 
             loss = loss / minibatch_size
-            curr_loss.append(loss)
             loss_total += loss.data
             loss_count += 1
             loss.backward()
             optimizer.step()
         print(loss_total / loss_count)
-        train_losses.append(sum(curr_loss))
-        print("training loss for this epoch {}".format(epoch + 1, train_losses))
         print("Training completed for epoch {}".format(epoch + 1))
         print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
         train_list.append(correct/total)
@@ -209,30 +205,19 @@ if __name__ == "__main__":
         tst_list.append(correct/total)
 
         epoch += 1
-        #stopping after 10 epochs
-        if epoch > 9:
+        #stopping after 5 epochs
+        if epoch > 4:
             stopping_condition = True
 
-    '''x = list(np.arange(args.epochs))
-     plt.plot(x, train_list, label="Train Accuracy")
-     plt.plot(x, valid_list, label="Validation Accuracy")
-     plt.plot(x, tst_list, label="Test Accuracy")
-     plt.title("Accuracy Plot")
-     plt.xlabel("epochs")
-     plt.ylabel("accuracy")
-     plt.legend() '''
 
-    
-    x = list(np.arange(1,11))
-    plt.plot(x, loss, label="Train Loss")
-    plt.title("Train Loss - ffnn")
+    #print(train_list)
+    #print(valid_list)
+    #print(tst_list)
+    x = list(np.arange(1,5))
+    plt.plot(x, train_list, label="Train Accuracy")
+    plt.plot(x, valid_list, label="Validation Accuracy")
+    plt.plot(x, tst_list, label="Test Accuracy")
+    plt.title("Accuracy Plot")
     plt.xlabel("epochs")
-    plt.ylabel("loss")
+    plt.ylabel("accuracy")
     plt.legend()
-
-
-    # You may find it beneficial to keep track of training accuracy or training loss;
-
-    # Think about how to update the model and what this entails. Consider ffnn.py and the PyTorch documentation for guidance
-
-    #

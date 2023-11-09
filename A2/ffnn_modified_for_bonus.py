@@ -22,9 +22,11 @@ class FFNN(nn.Module):
         super(FFNN, self).__init__()
         self.h = h
         self.W1 = nn.Linear(input_dim, h)
-        self.activation = nn.ReLU()  # The rectified linear unit; one valid choice of activation function
+        self.activation1 = nn.ReLU()  # The rectified linear unit; one valid choice of activation function
+        self.W2 = nn.Linear(h, 16)
+        self.activation2 = nn.ReLU()
         self.output_dim = 5
-        self.W2 = nn.Linear(h, self.output_dim)
+        self.W3 = nn.Linear(16, self.output_dim)
 
         self.softmax = nn.LogSoftmax()  # The softmax function that converts vectors into probability distributions; computes log probabilities for computational benefits
         self.loss = nn.NLLLoss()  # The cross-entropy/negative log likelihood loss taught in class
@@ -35,11 +37,16 @@ class FFNN(nn.Module):
     def forward(self, input_vector):
         # [to fill] obtain first hidden layer representation
         x = self.W1(input_vector)
-        # [to fill] obtain output layer representation
-        x = self.activation(x)
+        
+        # [to fill] obtain output layer representation - 2 layers
+        x = self.activation1(x)
         x = self.W2(x)
+        x = self.activation2(x)
+        x = self.W3(x)
+        
         # [to fill] obtain probability dist.
         predicted_vector = self.softmax(x)
+        
         return predicted_vector
 
 
@@ -222,14 +229,15 @@ if __name__ == "__main__":
         print("Test time for this epoch: {}".format(time.time() - start_time))
 
 
-   ''' x = list(np.arange(args.epochs))
+
+    #print(train_list)
+    #print(valid_list)
+    #print(tst_list)
+    x = list(np.arange(1,6))
     plt.plot(x, train_list, label="Train Accuracy")
     plt.plot(x, valid_list, label="Validation Accuracy")
     plt.plot(x, tst_list, label="Test Accuracy")
     plt.title("Accuracy Plot")
     plt.xlabel("epochs")
     plt.ylabel("accuracy")
-    plt.legend() '''
-
-
-
+    plt.legend()
