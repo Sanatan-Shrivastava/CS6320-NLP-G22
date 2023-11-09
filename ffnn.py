@@ -10,6 +10,7 @@ import time
 from tqdm import tqdm
 import json
 from argparse import ArgumentParser
+import matplotlib.pyplot as plt
 
 unk = '<UNK>'
 
@@ -87,7 +88,7 @@ def load_data(train_data, val_data, test_data):
     with open(val_data) as valid_f:
         validation = json.load(valid_f)
 
-    with open(tes_data) as test_f:
+    with open(test_data) as test_f:
         test = json.load(test_f)
 
     tra = []
@@ -132,6 +133,7 @@ if __name__ == "__main__":
     model = FFNN(input_dim=len(vocab), h=args.hidden_dim)
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     print("========== Training for {} epochs ==========".format(args.epochs))
+    train_list, valid_list, tst_list = [],[],[]
     for epoch in range(args.epochs):
         model.train()
         optimizer.zero_grad()
@@ -161,6 +163,7 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
         print("Training completed for epoch {}".format(epoch + 1))
+        train_list.append(correct/total)
         print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
         print("Training time for this epoch: {}".format(time.time() - start_time))
 
@@ -187,6 +190,7 @@ if __name__ == "__main__":
                     loss += example_loss
             loss = loss / minibatch_size
         print("Validation completed for epoch {}".format(epoch + 1))
+        valid_list.append(correct / total)
         print("Validation accuracy for epoch {}: {}".format(epoch + 1, correct / total))
         print("Validation time for this epoch: {}".format(time.time() - start_time))
 
@@ -213,6 +217,19 @@ if __name__ == "__main__":
                     loss += example_loss
             loss = loss / minibatch_size
         print("Test completed for epoch {}".format(epoch + 1))
+        tst_list.append(correct / total)
         print("Test accuracy for epoch {}: {}".format(epoch + 1, correct / total))
         print("Test time for this epoch: {}".format(time.time() - start_time))
+
+
+   ''' x = list(np.arange(args.epochs))
+    plt.plot(x, train_list, label="Train Accuracy")
+    plt.plot(x, valid_list, label="Validation Accuracy")
+    plt.plot(x, tst_list, label="Test Accuracy")
+    plt.title("Accuracy Plot")
+    plt.xlabel("epochs")
+    plt.ylabel("accuracy")
+    plt.legend() '''
+
+
 
