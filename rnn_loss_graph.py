@@ -213,7 +213,7 @@ if __name__ == "__main__":
         if epoch > 9:
             stopping_condition = True
 
-    ''' x = list(np.arange(args.epochs))
+    '''x = list(np.arange(args.epochs))
      plt.plot(x, train_list, label="Train Accuracy")
      plt.plot(x, valid_list, label="Validation Accuracy")
      plt.plot(x, tst_list, label="Test Accuracy")
@@ -222,15 +222,12 @@ if __name__ == "__main__":
      plt.ylabel("accuracy")
      plt.legend() '''
 
-
-    x = list(range(epoch))
-    plt.figure(figsize=(12, 5))
-    # Plot Training Loss
-    plt.subplot(1, 2, 2)
-    plt.plot(x, train_losses, label="Training Loss")
-    plt.title("Loss Plot")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
+    
+    x = list(np.arange(1,11))
+    plt.plot(x, loss, label="Train Loss")
+    plt.title("Train Loss - ffnn")
+    plt.xlabel("epochs")
+    plt.ylabel("loss")
     plt.legend()
 
 
